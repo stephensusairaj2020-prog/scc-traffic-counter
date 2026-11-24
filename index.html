@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1f4b">
+<meta name="description" content="SCC Traffic Counter - offline classified traffic survey counter">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SCC Counter"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>SCC Traffic Counter</title><style>*{box-sizing:border-box}body{margin:0;background:#0b1220;color:#f4f6fb;font:16px system-ui,Arial}header{display:flex;gap:14px;align-items:center;padding:18px;background:linear-gradient(120deg,#0b1f4b,#1d4ed8)}.brand{background:#fff;color:#0b1f4b;font-weight:900;border-radius:12px;padding:12px}h1{font-size:22px;margin:0}header small,.hint,small{color:#aebbd0}main{max-width:900px;margin:auto;padding:14px}.panel{background:#172235;border:1px solid #293950;border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 5px 18px #0003}h2{font-size:18px;margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;color:#cbd5e1;font-size:14px}input,select{display:block;width:100%;margin-top:6px;padding:12px;border-radius:10px;border:1px solid #53647d;background:#0e1828;color:white;font-size:16px}button{border:0;border-radius:12px;padding:13px 17px;font-weight:700;font-size:15px;cursor:pointer}.primary{background:#2563eb;color:white}.secondary{background:#34445d;color:white}.row{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}.spread{justify-content:space-between}.hint{font-size:12px;line-height:1.5}.hidden{display:none}.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.summary b{display:block;margin-top:4px}.pill{background:#1d4ed8;padding:7px 11px;border-radius:20px;font-size:12px}.totals{display:flex;gap:10px;margin-top:16px}.totals div{flex:1;text-align:center;background:#0e1828;padding:12px;border-radius:12px}.totals strong{display:block;font-size:25px;margin-top:4px}.vehicleGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.vehicle{background:#0e1828;color:#fff;border:1px solid #35465f;min-height:95px;text-align:left;padding:12px}.vehicle span{display:block;color:#9fb1c9;font-size:12px;margin-top:5px}.vehicle b{display:block;font-size:23px;margin-top:8px}.recent{font-size:13px;line-height:1.8;color:#cbd5e1}footer{text-align:center;padding:20px;color:#8292a9;font-size:12px}@media(max-width:560px){.grid{grid-template-columns:1fr}.vehicleGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.summary{grid-template-columns:repeat(2,1fr)}}
+.classGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.classCard{background:#0e1828;color:#fff;border:1px solid #40536e;border-radius:14px;padding:10px;text-align:center;min-height:165px}
+.classCard img{width:100%;height:88px;object-fit:contain;background:#f3f6fa;border-radius:9px}
+.classCard b{display:block;margin-top:8px;font-size:15px}
+.classCard small{display:block;margin-top:3px}
+.classCard strong{display:block;font-size:24px;margin-top:5px;color:#7dd3fc}
+
+.classEditor{margin-top:16px}.editRow{display:grid;grid-template-columns:65px 1fr 48px;gap:8px;align-items:center;margin:8px 0}.editRow input{margin:0}.editRow .emojiInput{text-align:center;font-size:24px;padding:8px}.removeBtn{background:#713b46;color:white;padding:12px 8px}.classCard .classEmoji{font-size:58px;display:grid;place-items:center;height:88px;background:#f1f5f9;border-radius:9px}.classCard{width:100%}
+.iconPickBtn{background:#34445d;color:#fff;padding:10px 7px;font-size:13px;white-space:nowrap}
+.iconModal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:16px;z-index:99}
+.iconModal.show{display:flex}
+.iconModalBox{width:min(560px,100%);max-height:82vh;overflow:auto;background:#172235;border:1px solid #53647d;border-radius:18px;padding:16px}
+.iconGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:12px}
+.iconChoice{background:#0e1828;color:white;border:1px solid #40536e;border-radius:12px;padding:12px 4px;font-size:30px;min-height:66px}
+.iconChoice:active{background:#2563eb}
+.iconSearch{margin:10px 0}
+@media(max-width:420px){.editRow{grid-template-columns:58px 1fr 42px}.iconGrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* PWA additions */
+html,body{overscroll-behavior-y:contain}
+button{touch-action:manipulation}
+.classCard{-webkit-user-select:none;user-select:none}
+#installBtn{padding:10px 14px;margin-left:auto}
+.savedItem{background:#0e1828;border:1px solid #35465f;border-radius:12px;padding:12px;margin:8px 0}
+.savedItem b{display:block;font-size:15px}.savedItem>small{display:block;margin-top:3px}.savedItem b small{display:inline;margin:0}
+.savedItem .row{margin-top:10px}.savedItem button{padding:9px 14px;font-size:14px}
+.danger{background:#713b46;color:#fff}
+.activeTag{background:#1d4ed8;color:#fff;border-radius:10px;font-size:11px;padding:2px 8px;margin-left:6px;font-weight:600}
+</style>
+</head>
+<body>
+<header><div class="brand">SCC</div><div><h1>Traffic Counter</h1><small>Classified Traffic Survey</small></div><button id="installBtn" type="button" class="secondary hidden">Install App</button></header>
+<main style="visibility:hidden">
+<section id="setup" class="panel">
+<h2>Project / Survey Setup</h2>
+<div class="grid">
+<label>Project name<input id="project" value="Qurum Beach TIA"></label>
+<label>Project code<input id="code" placeholder="Create or enter project code"></label>
+<label>Location / Station<input id="location" value="Qurum Beach / J-1"></label>
+<label>Survey date<input id="date" type="date"></label>
+<label>Start time<input id="start" type="time" value="08:00"></label>
+<label>End time<input id="end" type="time" value="18:00"></label>
+<label>Interval<select id="interval"><option>15</option><option>5</option><option>10</option><option>30</option><option>60</option></select> minutes</label>
+<label>Surveyor name<input id="surveyor" placeholder="Enter your name"></label>
+<label>Counting mode<select id="mode"><option value="both">One surveyor – IN & OUT</option><option value="assigned">Separate surveyors – assigned direction</option></select></label>
+<label>My direction<select id="direction"><option value="IN">IN</option><option value="OUT">OUT</option><option value="BOTH">BOTH</option></select></label>
+</div>
+<div class="panel classEditor"><h2>Custom Vehicle Classes</h2>
+<p class="hint">உங்கள் survey-க்கு தேவையான vehicle names மற்றும் icons-ஐ மாற்றலாம். Add / Remove செய்யலாம்.</p>
+<div id="classEditorRows"></div>
+<div id="iconModal" class="iconModal">
+ <div class="iconModalBox">
+  <div class="row spread"><h2>Choose an Icon</h2><button type="button" id="closeIconPicker" class="removeBtn">✕</button></div>
+  <input id="iconSearch" class="iconSearch" placeholder="Search icon name…">
+  <div id="iconGrid" class="iconGrid"></div>
+ </div>
+</div>
+<div class="row"><button type="button" id="addClass" class="secondary">+ Add Class</button><button type="button" id="resetClasses" class="secondary">Reset Default</button></div>
+</div>
+<div class="row"><button id="makeCode" class="secondary">Generate project code</button><button id="join" class="primary">Join / Start Survey</button><button id="resume" class="secondary">Resume Saved Survey</button></div>
+<p class="hint">Prototype note: project joining is currently recorded on this device. Shared live data between phones needs Firebase setup.</p>
+
+<div class="panel" id="savedPanel"><h2>Saved Surveys on this Device</h2>
+<p class="hint">Every survey is stored in this phone's local database and is never deleted automatically. Tap Resume to continue counting. Use Backup regularly and keep a copy outside the phone.</p>
+<div id="savedList"><p class="hint">Loading…</p></div>
+<div class="row"><button type="button" id="exportAll" class="secondary">Export All CSV</button><button type="button" id="backupBtn" class="secondary">Backup (JSON)</button><button type="button" id="shareBackup" class="secondary hidden">Share Backup</button><button type="button" id="restoreBtn" class="secondary">Restore Backup</button><input type="file" id="restoreFile" accept=".json,application/json" class="hidden"></div>
+</div>
+</section>
+
+<section id="counter" class="hidden">
+<div class="panel summary">
+<div><small>PROJECT</small><b id="sProject">—</b></div><div><small>STATION</small><b id="sLocation">—</b></div>
+<div><small>SURVEYOR</small><b id="sSurveyor">—</b></div><div><small>INTERVAL</small><b id="sInterval">—</b></div>
+</div>
+<div class="panel">
+<div class="row spread"><h2 id="intervalTitle">Current interval</h2><span id="timer" class="pill">Ready</span></div>
+<div class="row spread"><label>Direction <select id="activeDirection"><option>IN</option><option>OUT</option></select></label><button id="undo" class="secondary">Undo last</button></div>
+<div class="totals"><div><small>IN</small><strong id="inTotal">0</strong></div><div><small>OUT</small><strong id="outTotal">0</strong></div><div><small>ALL</small><strong id="allTotal">0</strong></div></div>
+</div>
+<div class="panel"><h2>Vehicle Classes – Tap to Count</h2><p class="hint">Tap the correct vehicle class. Each tap adds one count.</p><div id="classButtons" class="classGrid"></div></div>
+<div class="row"><button id="saveNow" class="primary">💾 Save Now</button><button id="export" class="secondary">Export CSV</button><button id="finish" class="secondary">Finish / Edit setup</button></div><p id="saveStatus" class="hint">Auto-save is enabled on this device.</p>
+<div class="panel"><h2>Recent counts</h2><div id="recent" class="recent">No counts yet.</div></div>
+</section>
+</main>
+<footer>Offline-first prototype · SCC · Local device storage<br><span id="offlineStatus">Checking offline mode…</span><br><span id="storageStatus"></span></footer>
+<script>const $=id=>document.getElementById(id);
+const defaults=[
+{ name:"Car",icon:"🚗"},{name:"Taxi",icon:"🚕"},{name:"Motorcycle",icon:"🏍️"},
+{name:"People",icon:"🚶"},{name:"6 Wheel Truck",icon:"🚚"},{name:"4 Wheel Bus",icon:"🚌"}
+];
+let classes=defaults.map(x=>({...x}));
+let session=null,counts=[],undoStack=[],editingIconIndex=null;
+const iconOptions=[
+["Car","🚗"],["Taxi","🚕"],["SUV","🚙"],["Pickup","🛻"],["Van","🚐"],["Bus","🚌"],["Minibus","🚍"],["Truck","🚚"],["Heavy Truck","🚛"],["Trailer","🚜"],["Motorcycle","🏍️"],["Scooter","🛵"],["Bicycle","🚲"],["E-Bike","🚴"],["Auto Rickshaw","🛺"],["Tractor","🚜"],["Emergency","🚑"],["Fire Engine","🚒"],["Police","🚓"],["Construction","🚧"],["Person","🚶"],["Walking","🚶‍♂️"],["Running","🏃"],["Wheelchair","🦽"],["Baby Stroller","🚼"],["Airplane","✈️"],["Train","🚆"],["Metro","🚇"],["Boat","🚤"],["Ship","🚢"],["Traffic Light","🚦"],["Stop Sign","🛑"],["Road","🛣️"],["Barrier","🚧"],["Parking","🅿️"],["Other Vehicle","🚘"],["Animal","🐄"],["Unknown","❓"]
+];
+const pad=n=>String(n).padStart(2,"0");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function timePlus(t,m){let [h,min]=t.split(":").map(Number),d=h*60+min+m;return `${pad(Math.floor(d/60)%24)}:${pad(d%60)}`}
+function currentSlot(){if(!session)return "";let now=new Date(),cur=`${pad(now.getHours())}:${pad(now.getMinutes())}`,start=session.start,end=session.end;if(cur<start||cur>=end)return `${start} – ${end} (manual survey window)`;let mins=Number(session.interval),elapsed=(+cur.slice(0,2)*60 + +cur.slice(3))- (+start.slice(0,2)*60 + +start.slice(3));let slot=Math.floor(elapsed/mins)*mins;return `${timePlus(start,slot)} – ${timePlus(start,slot+mins)}`}
+
+/* =====================================================================
+   LOCAL DATABASE (IndexedDB) - all survey data stays on this device
+   Stores:  meta    -> key/value (classes, activeSurveyId, savedAt)
+            surveys -> one record per survey {id, session, createdAt, updatedAt}
+            counts  -> one record per vehicle tap (auto-increment seq, index surveyId)
+   Nothing here ever deletes data automatically.
+   ===================================================================== */
+const DB_NAME="scc_traffic_counter",DB_VERSION=1;
+let db=null,dbReady=false,writeChain=Promise.resolve();
+function openDB(){return new Promise((res,rej)=>{
+ const r=indexedDB.open(DB_NAME,DB_VERSION);
+ r.onupgradeneeded=()=>{const d=r.result;
+  if(!d.objectStoreNames.contains("meta"))d.createObjectStore("meta");
+  if(!d.objectStoreNames.contains("surveys"))d.createObjectStore("surveys",{keyPath:"id"});
+  if(!d.objectStoreNames.contains("counts")){const s=d.createObjectStore("counts",{keyPath:"seq",autoIncrement:true});s.createIndex("surveyId","surveyId")}
+ };
+ r.onsuccess=()=>{const d=r.result;d.onversionchange=()=>d.close();res(d)};
+ r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error("Database blocked by another tab"));
+})}
+// Run one transaction; resolves after it is fully committed ("strict" durability = flushed to disk).
+function run(stores,mode,fn){return new Promise((res,rej)=>{
+ let t;try{t=db.transaction(stores,mode,{durability:"strict"})}catch(e){try{t=db.transaction(stores,mode)}catch(e2){rej(e2);return}}
+ let r;try{r=fn(t)}catch(e){try{t.abort()}catch(_){}rej(e);return}
+ t.oncomplete=()=>res(r&&typeof r==="object"&&"result" in r?r.result:r);
+ t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||new Error("Transaction aborted"));
+})}
+// Writes are queued so they always happen in tap order.
+function enqueue(fn){const p=writeChain.then(fn);writeChain=p.then(()=>{},e=>{storageError(e)});p.catch(()=>{});return p}
+const get=(store,key)=>run([store],"readonly",t=>t.objectStore(store).get(key));
+const getAll=store=>run([store],"readonly",t=>t.objectStore(store).getAll());
+const countsFor=id=>run(["counts"],"readonly",t=>t.objectStore("counts").index("surveyId").getAll(id)).then(a=>a.sort((x,y)=>x.seq-y.seq));
+function storageError(e){console.error("SCC storage error",e);const s=$("saveStatus");if(s){s.textContent="⚠ Could not save to this device. Tap Export CSV now to keep your data.";s.style.color="#fca5a5"}}
+function setSaved(){const s=$("saveStatus");if(s){s.textContent="Saved on this device · "+new Date().toLocaleTimeString();s.style.color=""}}
+function surveyRecord(sess){return {id:sess.id,session:sess,createdAt:sess.createdAt,updatedAt:new Date().toISOString()}}
+function stamp(t,sess){if(sess&&sess.id)t.objectStore("surveys").put(surveyRecord(sess));t.objectStore("meta").put(new Date().toISOString(),"savedAt")}
+
+// save(): store survey info + vehicle classes. (Each count is stored separately by persistAdd.)
+function save(){
+ if(!dbReady)return Promise.resolve();
+ const sess=session?{...session}:null,cls=classes.map(c=>({...c}));
+ const p=enqueue(()=>run(["meta","surveys"],"readwrite",t=>{
+  const m=t.objectStore("meta");m.put(cls,"classes");if(sess)m.put(sess.id,"activeSurveyId");stamp(t,sess);
+ })).then(setSaved);
+ p.catch(()=>{});return p;
+}
+// Every tap is written to the database immediately (in its own committed transaction).
+function persistAdd(item){
+ if(!dbReady)return;
+ const sess={...session};
+ const p=enqueue(()=>run(["counts","surveys","meta"],"readwrite",t=>{
+  const r=t.objectStore("counts").add({...item});r.onsuccess=()=>{item.seq=r.result};stamp(t,sess);return r;
+ })).then(setSaved);
+ p.catch(()=>{});
+}
+function persistUndo(item){
+ if(!dbReady)return;
+ const sess={...session};
+ const p=enqueue(()=>run(["counts","surveys","meta"],"readwrite",t=>{
+  if(item.seq!=null)t.objectStore("counts").delete(item.seq);stamp(t,sess);
+ })).then(setSaved);
+ p.catch(()=>{});
+}
+
+/* ---- one-time import of data saved by the older localStorage version (same browser/origin only) ---- */
+async function migrateLegacy(){
+ if(await get("meta","legacyMigrated"))return;
+ let s=null,c=[],cl=null;
+ try{s=JSON.parse(localStorage.getItem("scc_session")||"null");c=JSON.parse(localStorage.getItem("scc_counts")||"[]");cl=JSON.parse(localStorage.getItem("scc_classes")||"null")}catch(e){}
+ await run(["meta","surveys","counts"],"readwrite",t=>{
+  const m=t.objectStore("meta");
+  if(Array.isArray(cl)&&cl.length)m.put(cl,"classes");
+  if(s&&typeof s==="object"){
+   s.id="legacy-"+Date.now().toString(36);s.createdAt=new Date().toISOString();
+   t.objectStore("surveys").put({id:s.id,session:s,createdAt:s.createdAt,updatedAt:new Date().toISOString()});
+   const cs=t.objectStore("counts");(Array.isArray(c)?c:[]).forEach(x=>{const {seq,...rest}=x;cs.add({...rest,surveyId:s.id})});
+   m.put(s.id,"activeSurveyId");
+  }
+  m.put(true,"legacyMigrated");
+ });
+}
+async function loadState(){
+ const cl=await get("meta","classes");if(Array.isArray(cl)&&cl.length)classes=cl;
+ const aid=await get("meta","activeSurveyId");
+ if(aid){const rec=await get("surveys",aid);if(rec){session=rec.session;counts=await countsFor(aid)}}
+}
+
+/* =====================================================================
+   ORIGINAL APP LOGIC (unchanged behaviour)
+   ===================================================================== */
+function fillForm(){if(!session)return;[["project","project"],["code","code"],["location","location"],["start","start"],["end","end"],["interval","interval"],["surveyor","surveyor"],["mode","mode"]].forEach(([id,k])=>{if(session[k]!=null&&$(id))$(id).value=session[k]});if(session.mode==="assigned"&&session.direction)$("direction").value=session.direction}
+function openSavedSurvey(){
+ if(!session){alert("No saved survey found on this device.");return}
+ $("setup").classList.add("hidden");$("counter").classList.remove("hidden");
+ $("sProject").textContent=session.project||"—";$("sLocation").textContent=session.location||"—";
+ $("sSurveyor").textContent=session.surveyor||"—";$("sInterval").textContent=(session.interval||"15")+" min";
+ $("activeDirection").value=session.direction==="OUT"?"OUT":"IN";
+ $("activeDirection").disabled=session.direction!=="BOTH";
+ draw();
+}
+function renderEditor(){
+ const box=$("classEditorRows");box.innerHTML="";
+ classes.forEach((c,i)=>{
+  let row=document.createElement("div");row.className="editRow";
+  let iconWrap=document.createElement("div");iconWrap.style.display="grid";iconWrap.style.gap="4px";
+  let icon=document.createElement("div");icon.textContent=c.icon;icon.style.cssText="font-size:28px;text-align:center;padding:8px;background:#0e1828;border:1px solid #53647d;border-radius:10px;min-height:52px";
+  let choose=document.createElement("button");choose.type="button";choose.className="iconPickBtn";choose.textContent="Choose";
+  choose.onclick=()=>openIconPicker(i);
+  iconWrap.append(icon,choose);
+  let name=document.createElement("input");name.value=c.name;name.placeholder="Vehicle class name";
+  name.onchange=()=>{classes[i].name=name.value.trim()||"Vehicle";save()};
+  let del=document.createElement("button");del.className="removeBtn";del.textContent="×";del.title="Remove class";
+  del.onclick=()=>{if(classes.length===1){alert("At least one class is required.");return}classes.splice(i,1);save();renderEditor()};
+  row.append(iconWrap,name,del);box.append(row);
+ });
+}
+function openIconPicker(index){
+ editingIconIndex=index;
+ $("iconSearch").value="";
+ renderIconChoices("");
+ $("iconModal").classList.add("show");
+}
+function renderIconChoices(query){
+ const grid=$("iconGrid");grid.innerHTML="";
+ const q=query.trim().toLowerCase();
+ iconOptions.filter(x=>!q||x[0].toLowerCase().includes(q)).forEach(([name,emoji])=>{
+  const b=document.createElement("button");b.type="button";b.className="iconChoice";
+  b.textContent=emoji;b.title=name;
+  b.onclick=()=>{if(editingIconIndex!==null){classes[editingIconIndex].icon=emoji;save();renderEditor()}$("iconModal").classList.remove("show");};
+  grid.append(b);
+ });
+ if(!grid.children.length){grid.textContent="No matching icons found.";}
+}
+$("iconSearch").oninput=e=>renderIconChoices(e.target.value);
+$("closeIconPicker").onclick=()=>$("iconModal").classList.remove("show");
+$("iconModal").onclick=e=>{if(e.target.id==="iconModal")$("iconModal").classList.remove("show")};
+$("addClass").onclick=()=>{classes.push({name:"New Vehicle",icon:"🚘"});save();renderEditor()};
+$("resetClasses").onclick=()=>{if(confirm("Reset vehicle classes to default six?")){classes=defaults.map(x=>({...x}));save();renderEditor()}};
+function totals(){let ins=counts.filter(x=>x.direction==="IN").reduce((a,x)=>a+x.count,0),outs=counts.filter(x=>x.direction==="OUT").reduce((a,x)=>a+x.count,0);$("inTotal").textContent=ins;$("outTotal").textContent=outs;$("allTotal").textContent=ins+outs}
+function draw(){const box=$("classButtons");box.innerHTML="";classes.forEach((v,i)=>{let n=counts.filter(x=>x.vehicle===v.name&&x.direction===$("activeDirection").value).reduce((a,x)=>a+x.count,0);let card=document.createElement("button");card.className="classCard";card.innerHTML=`<div class="classEmoji">${esc(v.icon)}</div><b>${i+1}. ${esc(v.name)}</b><strong>${n}</strong>`;card.onclick=()=>add(v);box.appendChild(card)});totals();$("intervalTitle").textContent="Interval: "+currentSlot();$("recent").innerHTML=counts.slice(-8).reverse().map(x=>`${esc(x.time)} · ${esc(x.direction)} · ${esc(x.vehicle)} · +${x.count}`).join("<br>")||"No counts yet."}
+function add(v){let d=$("activeDirection").value;if(session.direction!=="BOTH"&&d!==session.direction){alert("Your assignment is "+session.direction);return}let item={surveyId:session.id,vehicle:v.name,baselineClass:v.name,direction:d,time:new Date().toLocaleTimeString(),interval:currentSlot(),count:1,surveyor:session.surveyor,code:session.code,project:session.project,location:session.location,date:session.date};counts.push(item);undoStack.push(item);persistAdd(item);draw()}
+$("makeCode").onclick=()=>{$("code").value="SCC-"+Math.random().toString(36).slice(2,7).toUpperCase()}
+$("join").onclick=()=>{if(!$("project").value||!$("code").value||!$("surveyor").value){alert("Enter project name, project code and surveyor name.");return}
+ const ns={id:"S"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),createdAt:new Date().toISOString(),project:$("project").value,code:$("code").value.toUpperCase(),location:$("location").value,date:$("date").value||new Date().toISOString().slice(0,10),start:$("start").value,end:$("end").value,interval:$("interval").value,surveyor:$("surveyor").value,mode:$("mode").value,direction:$("mode").value==="both"?"BOTH":$("direction").value};
+ if(ns.mode==="assigned"&&ns.direction==="BOTH"){alert("Choose IN or OUT for assigned surveyor mode.");return}
+ session=ns;counts=[];undoStack=[];save().then(renderSavedList);openSavedSurvey()}
+$("resume").onclick=async()=>{
+ if(!dbReady){openSavedSurvey();return}
+ await writeChain;const list=await listSurveys();
+ if(!list.length){alert("No saved survey found on this device.");return}
+ await resumeSurvey(list[0].id);
+};
+$("saveNow").onclick=async()=>{
+ try{
+  await save();
+  if(dbReady){const n=await run(["counts"],"readonly",t=>t.objectStore("counts").index("surveyId").count(session.id));
+   if(n!==counts.length)throw new Error("Stored "+n+" of "+counts.length+" counts");
+   alert("Survey saved successfully on this device.\n"+n+" counts stored.");
+  }else alert("Local database is not available in this browser. Please use Export CSV.");
+ }catch(e){alert("Save failed. Please export CSV and check browser storage.");}
+};
+$("activeDirection").onchange=draw;
+$("undo").onclick=()=>{if(!counts.length)return;const it=counts.pop();undoStack.pop();persistUndo(it);draw()};
+$("finish").onclick=()=>{$("counter").classList.add("hidden");$("setup").classList.remove("hidden");renderEditor();renderSavedList()};
+
+/* ---- CSV export (same columns as before) ---- */
+const CSV_HEAD=["Project","Project Code","Survey Date","Location","Surveyor","Direction","Interval","Count Time","Vehicle Class","Count"];
+const csvRow=x=>[x.project,x.code,x.date,x.location,x.surveyor,x.direction,x.interval,x.time,x.vehicle,x.count];
+function toCSV(list){return "\ufeff"+[CSV_HEAD,...list.map(csvRow)].map(r=>r.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(",")).join("\n")}
+const safeName=s=>String(s??"").replace(/[\\/:*?"<>|\s]+/g,"_");
+function download(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},1500)}
+$("export").onclick=()=>{download(new Blob([toCSV(counts)],{type:"text/csv;charset=utf-8"}),`SCC_${safeName(session.code)}_${safeName(session.surveyor)}.csv`)};
+
+/* =====================================================================
+   SAVED SURVEYS, RESUME, BACKUP / RESTORE
+   ===================================================================== */
+async function listSurveys(){
+ const recs=await getAll("surveys"),out=[];
+ for(const r of recs){const n=await run(["counts"],"readonly",t=>t.objectStore("counts").index("surveyId").count(r.id));out.push({...r,n})}
+ out.sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));return out;
+}
+async function resumeSurvey(id){
+ try{
+  await writeChain;
+  const rec=await get("surveys",id);if(!rec){alert("Survey not found on this device.");return}
+  session=rec.session;counts=await countsFor(id);undoStack=[];
+  await enqueue(()=>run(["meta"],"readwrite",t=>t.objectStore("meta").put(id,"activeSurveyId")));
+  fillForm();openSavedSurvey();
+ }catch(e){console.error(e);alert("Could not open this survey: "+e.message)}
+}
+async function deleteSurvey(id,label){
+ if(!confirm("Delete this survey from this device?\n\n"+label+"\n\nThis cannot be undone. Export CSV or a Backup first if you need this data."))return;
+ try{
+  await writeChain;
+  await run(["surveys","counts"],"readwrite",t=>{
+   t.objectStore("surveys").delete(id);
+   const cur=t.objectStore("counts").index("surveyId").openCursor(IDBKeyRange.only(id));
+   cur.onsuccess=()=>{const c=cur.result;if(c){c.delete();c.continue()}};
+  });
+  if(session&&session.id===id){session=null;counts=[];undoStack=[];await enqueue(()=>run(["meta"],"readwrite",t=>t.objectStore("meta").delete("activeSurveyId")))}
+  renderSavedList();
+ }catch(e){alert("Delete failed: "+e.message)}
+}
+async function renderSavedList(){
+ const box=$("savedList");
+ if(!dbReady){box.innerHTML='<p class="hint">Local database is not available in this browser.</p>';return}
+ try{
+  await writeChain;const list=await listSurveys();
+  if(!list.length){box.innerHTML='<p class="hint">No saved surveys yet. Start a survey and it will appear here automatically.</p>';return}
+  box.innerHTML="";
+  list.forEach(s=>{
+   const se=s.session||{},card=document.createElement("div");card.className="savedItem";
+   const active=session&&session.id===s.id?'<span class="activeTag">Current</span>':"";
+   card.innerHTML=`<b>${esc(se.project)} <small>· ${esc(se.code)}</small>${active}</b><small>${esc(se.location)} · ${esc(se.date)} · ${esc(se.surveyor)}</small><small>${s.n} counts · last saved ${esc(s.updatedAt?new Date(s.updatedAt).toLocaleString():"—")}</small>`;
+   const row=document.createElement("div");row.className="row";
+   const mk=(txt,cls,fn)=>{const b=document.createElement("button");b.type="button";b.className=cls;b.textContent=txt;b.onclick=fn;row.append(b)};
+   mk("Resume","primary",()=>resumeSurvey(s.id));
+   mk("CSV","secondary",async()=>{const cs=await countsFor(s.id);download(new Blob([toCSV(cs)],{type:"text/csv;charset=utf-8"}),`SCC_${safeName(se.code)}_${safeName(se.surveyor)}.csv`)});
+   mk("Delete","danger",()=>deleteSurvey(s.id,(se.project||"")+" · "+(se.code||"")+" · "+(se.date||"")+" ("+s.n+" counts)"));
+   card.append(row);box.append(card);
+  });
+ }catch(e){console.error(e);box.innerHTML='<p class="hint">Could not read saved surveys.</p>'}
+}
+async function buildBackup(){
+ await writeChain;
+ const surveys=await getAll("surveys"),all=await getAll("counts"),by={};
+ all.forEach(c=>(by[c.surveyId]=by[c.surveyId]||[]).push(c));
+ surveys.forEach(s=>{s.counts=(by[s.id]||[]).sort((a,b)=>a.seq-b.seq)});
+ return {app:"SCC Traffic Counter",format:1,exportedAt:new Date().toISOString(),classes,surveys};
+}
+function backupName(){const d=new Date();return `SCC_Backup_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.json`}
+$("exportAll").onclick=async()=>{
+ try{await writeChain;const surveys=(await getAll("surveys")).sort((a,b)=>(a.createdAt||"").localeCompare(b.createdAt||""));
+  if(!surveys.length){alert("No saved surveys on this device yet.");return}
+  let all=[];for(const s of surveys)all=all.concat(await countsFor(s.id));
+  const d=new Date();download(new Blob([toCSV(all)],{type:"text/csv;charset=utf-8"}),`SCC_All_Surveys_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.csv`);
+ }catch(e){alert("Export failed: "+e.message)}
+};
+$("backupBtn").onclick=async()=>{
+ try{const data=await buildBackup();download(new Blob([JSON.stringify(data)],{type:"application/json"}),backupName())}
+ catch(e){alert("Backup failed: "+e.message)}
+};
+$("shareBackup").onclick=async()=>{
+ try{const data=await buildBackup();const f=new File([JSON.stringify(data)],backupName(),{type:"application/json"});
+  if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:"SCC Traffic Counter backup"});
+  else download(f,f.name);
+ }catch(e){if(e&&e.name!=="AbortError")alert("Share failed: "+e.message)}
+};
+$("restoreBtn").onclick=()=>$("restoreFile").click();
+$("restoreFile").onchange=async e=>{
+ const f=e.target.files[0];e.target.value="";if(!f)return;
+ try{
+  const data=JSON.parse(await f.text());
+  if(data.app!=="SCC Traffic Counter"||!Array.isArray(data.surveys))throw new Error("This is not an SCC Traffic Counter backup file.");
+  let added=0,skipped=0,nc=0;
+  for(const s of data.surveys){
+   if(!s||!s.id)continue;
+   if(await get("surveys",s.id)){skipped++;continue}
+   await run(["surveys","counts"],"readwrite",t=>{
+    const {counts:cs,...rec}=s;t.objectStore("surveys").put(rec);
+    const st=t.objectStore("counts");(cs||[]).forEach(c=>{const {seq,...rest}=c;st.add({...rest,surveyId:s.id})});
+   });
+   added++;nc+=(s.counts||[]).length;
+  }
+  if(Array.isArray(data.classes)&&data.classes.length&&confirm("Also restore the vehicle class list from this backup?\n(This replaces the current class list.)")){classes=data.classes.map(c=>({name:String(c.name||"Vehicle"),icon:String(c.icon||"🚘")}));await save();renderEditor()}
+  alert("Restore complete.\nSurveys added: "+added+"\nAlready on this device (skipped): "+skipped+"\nCounts restored: "+nc);
+  renderSavedList();
+ }catch(err){alert("Restore failed: "+err.message)}
+};
+
+/* =====================================================================
+   PWA: install button, offline status, service worker, storage protection
+   ===================================================================== */
+let deferredInstall=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;$("installBtn").classList.remove("hidden")});
+window.addEventListener("appinstalled",()=>{deferredInstall=null;$("installBtn").classList.add("hidden")});
+$("installBtn").onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();try{await deferredInstall.userChoice}catch(e){}deferredInstall=null;$("installBtn").classList.add("hidden")};
+async function checkOffline(){
+ const el=$("offlineStatus");
+ try{
+  const need=["./index.html","./manifest.json","./icon-192.png","./icon-512.png"];
+  const hits=await Promise.all(need.map(n=>caches.match(n)));
+  el.textContent=hits.every(Boolean)?"✓ Ready to use offline":"Preparing offline mode…";
+ }catch(e){el.textContent="Offline mode not available"}
+}
+if("serviceWorker" in navigator){
+ window.addEventListener("load",()=>{
+  navigator.serviceWorker.register("./service-worker.js",{scope:"./"})
+   .then(()=>navigator.serviceWorker.ready).then(checkOffline)
+   .catch(e=>{console.error(e);$("offlineStatus").textContent="Offline mode not available"});
+ });
+}else{$("offlineStatus").textContent="Offline mode not supported in this browser";}
+try{const tf=new File(["{}"],"t.json",{type:"application/json"});if(navigator.canShare&&navigator.canShare({files:[tf]}))$("shareBackup").classList.remove("hidden")}catch(e){}
+
+/* =====================================================================
+   START-UP
+   ===================================================================== */
+(async function init(){
+ $("date").value=new Date().toISOString().slice(0,10);
+ try{
+  if(!("indexedDB" in window))throw new Error("IndexedDB not supported");
+  db=await openDB();dbReady=true;
+  await migrateLegacy();await loadState();
+ }catch(e){
+  console.error(e);dbReady=false;
+  alert("Warning: the local database could not be opened on this device/browser. Counting will work, but data will NOT be kept after closing. Use Export CSV often.");
+ }
+ renderEditor();
+ if(session){fillForm();openSavedSurvey()}   // restore previous survey automatically after reopening
+ renderSavedList();
+ document.querySelector("main").style.visibility="visible";
+ if(navigator.storage&&navigator.storage.persist){
+  navigator.storage.persist().then(g=>{$("storageStatus").textContent=g?"✓ Storage protected on this device":"Storage: standard (installing the app improves protection)"}).catch(()=>{});
+ }
+})();
+// Keep the latest state when the screen locks, the app is backgrounded, or the page is closed.
+window.addEventListener("pagehide",save);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")save()});
+</script>
+</body></html>
